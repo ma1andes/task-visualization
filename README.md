@@ -1,69 +1,127 @@
-# React + TypeScript + Vite
+# Task Visualization - Космические объекты
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Приложение для визуализации космических объектов (edges) и их характеристик (tags) во времени.
 
-Currently, two official plugins are available:
+## 🚀 Технологии
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **React 18** - UI библиотека
+- **TypeScript** - типизация
+- **Vite** - сборщик и dev сервер
+- **React Router** - маршрутизация
+- **Tanstack React Query** - управление состоянием сервера
+- **CSS Modules** - стилизация
 
-## Expanding the ESLint configuration
+## 📁 Архитектура проекта
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```
+src/
+├── api/                  # API функции и React Query hooks
+│   ├── edges.ts         # Загрузка списка космических объектов
+│   ├── currents.ts      # Текущие значения тегов
+│   └── histories.ts     # История изменений тегов
+├── components/          # UI компоненты
+│   ├── EdgeList.tsx     # Список космических объектов
+│   ├── EdgeList.css
+│   ├── EdgeDetails.tsx  # Детали объекта + boolean индикаторы
+│   └── EdgeDetails.css
+├── pages/               # Страницы приложения
+│   ├── EdgesPage.tsx    # Главная страница с объектами
+│   └── EdgesPage.css
+├── types.ts             # TypeScript типы
+├── routes.tsx           # Настройка React Router
+└── App.tsx              # Главный компонент
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 🎯 Реализованные функции
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### ✅ Страница Edges (готова)
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+- **Левая панель**: Список космических объектов из API
+- **Правая панель**: Информация о выбранном объекте
+- **Boolean-теги**: Отображение в виде on/off индикаторов
+  - `true` — красный индикатор
+  - `false` — зелёный индикатор
+- **Навигация**: Ссылки на страницы currents/histories
+
+### 🔄 В разработке
+
+- **Страница Currents**: Визуализация текущих значений тегов
+- **Страница Histories**: Графики истории изменений
+
+## 🛠 Установка и запуск
+
+### Предварительные требования
+
+- Node.js 18+
+- npm или yarn
+
+### Установка зависимостей
+
+```bash
+npm install
 ```
+
+### Запуск в режиме разработки
+
+```bash
+npm run dev
+```
+
+Приложение будет доступно по адресу: `http://localhost:5173`
+
+### Сборка для продакшена
+
+```bash
+npm run build
+```
+
+### Предварительный просмотр сборки
+
+```bash
+npm run preview
+```
+
+## 🐳 Docker
+
+### Сборка и запуск с Docker Compose
+
+```bash
+docker-compose up --build
+```
+
+Приложение будет доступно по адресу: `http://localhost:3000`
+
+## 📡 API
+
+Приложение использует следующие эндпоинты:
+
+- `GET /api/edges` - Список космических объектов
+- `GET /api/current?edge={EDGE_ID}` - Текущие значения тегов
+- `GET /api/history?edge={EDGE_ID}` - История изменений тегов
+
+## 🎨 Дизайн
+
+- **Тёмная тема** - космическая атмосфера
+- **Адаптивный дизайн** - поддержка мобильных устройств
+- **Интуитивный интерфейс** - простота навигации
+- **Визуальные индикаторы** - цветовое кодирование состояний
+
+## 🔧 Разработка
+
+### Структура компонентов
+
+Каждый компонент имеет:
+
+- TypeScript интерфейсы для пропсов
+- CSS модули для стилизации
+- Обработку состояний загрузки и ошибок
+
+### Управление состоянием
+
+- **React Query** для серверного состояния
+- **useState** для локального состояния компонентов
+- **React Router** для навигации
+
+### Типизация
+
+Все API ответы и компоненты полностью типизированы с помощью TypeScript.

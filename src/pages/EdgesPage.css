@@ -1,0 +1,107 @@
+.edges-page {
+  width: 100%;
+  height: 100vh;
+  background: #0f0f0f;
+  color: #ffffff;
+  overflow: hidden;
+}
+
+.error-message {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  text-align: center;
+  padding: 40px;
+}
+
+.error-message h2 {
+  margin: 0 0 16px 0;
+  color: #dc2626;
+  font-size: 1.8rem;
+}
+
+.error-message p {
+  margin: 0 0 12px 0;
+  color: #888;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.edges-layout {
+  display: flex;
+  height: 100vh;
+}
+
+.left-panel {
+  width: 40%;
+  min-width: 400px;
+  max-width: 600px;
+  height: 100%;
+  border-right: 2px solid #333;
+}
+
+.right-panel {
+  flex: 1;
+  height: 100%;
+  min-width: 500px;
+}
+
+/* Адаптивность для мобильных устройств */
+@media (max-width: 768px) {
+  .edges-layout {
+    flex-direction: column;
+  }
+
+  .left-panel {
+    width: 100%;
+    height: 50%;
+    min-width: unset;
+    max-width: unset;
+    border-right: none;
+    border-bottom: 2px solid #333;
+  }
+
+  .right-panel {
+    width: 100%;
+    height: 50%;
+    min-width: unset;
+  }
+}
+
+/* Индикатор обновления данных */
+.update-indicator {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: rgba(0, 0, 0, 0.8);
+  color: #ffffff;
+  padding: 10px 15px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  z-index: 1000;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid #ffffff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
