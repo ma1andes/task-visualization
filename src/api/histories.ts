@@ -5,7 +5,6 @@ const API_BASE_URL = import.meta.env.DEV
   ? "/api"
   : "https://drill.greact.ru/api";
 
-// Функция для получения истории значений тегов
 export const fetchHistories = async (
   edgeId: string
 ): Promise<HistoryApiResponse> => {
@@ -26,14 +25,13 @@ export const fetchHistories = async (
   return data;
 };
 
-// React Query hook для получения histories
 export const useHistories = (edgeId: string) => {
   return useQuery({
     queryKey: ["histories", edgeId],
     queryFn: () => fetchHistories(edgeId),
     enabled: !!edgeId,
-    staleTime: 0, // Данные всегда считаются устаревшими
-    refetchInterval: 10 * 1000, // Обновляем каждые 10 секунд
+    staleTime: 0,
+    refetchInterval: 10 * 1000,
     retry: 3,
   });
 };

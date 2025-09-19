@@ -3,7 +3,6 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import AppRouter from "./routes";
 import "./App.css";
 
-// Создаем QueryClient для React Query
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {

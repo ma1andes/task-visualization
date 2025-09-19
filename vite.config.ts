@@ -9,7 +9,7 @@ export default defineConfig({
       "/api": {
         target: "https://drill.greact.ru",
         changeOrigin: true,
-        secure: false, // Отключаем проверку SSL сертификата
+        secure: false,
         rewrite: (path) => path.replace(/^\/api/, "/api"),
       },
     },

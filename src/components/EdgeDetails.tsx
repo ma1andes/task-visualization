@@ -96,6 +96,24 @@ const EdgeDetails: React.FC<EdgeDetailsProps> = ({
           </p>
         </div>
 
+        <div className="navigation-section">
+          <h3>Навигация</h3>
+          <div className="nav-links">
+            <Link
+              to={`/currents/${edge.id}`}
+              className="nav-link currents-link"
+            >
+              📊 Текущие значения
+            </Link>
+            <Link
+              to={`/histories/${edge.id}`}
+              className="nav-link histories-link"
+            >
+              📈 История изменений
+            </Link>
+          </div>
+        </div>
+
         {tags.length > 0 && (
           <>
             {/* Boolean теги */}
@@ -147,24 +165,6 @@ const EdgeDetails: React.FC<EdgeDetailsProps> = ({
             )}
           </>
         )}
-
-        <div className="navigation-section">
-          <h3>Навигация</h3>
-          <div className="nav-links">
-            <Link
-              to={`/currents/${edge.id}`}
-              className="nav-link currents-link"
-            >
-              📊 Текущие значения
-            </Link>
-            <Link
-              to={`/histories/${edge.id}`}
-              className="nav-link histories-link"
-            >
-              📈 История изменений
-            </Link>
-          </div>
-        </div>
       </div>
     </div>
   );
