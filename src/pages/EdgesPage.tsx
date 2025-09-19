@@ -7,7 +7,6 @@ import "./EdgesPage.css";
 const EdgesPage: React.FC = () => {
   const [selectedEdgeId, setSelectedEdgeId] = useState<string | null>(null);
 
-  // Загружаем список всех edges
   const {
     data: edgesData,
     isLoading: edgesLoading,
@@ -15,7 +14,6 @@ const EdgesPage: React.FC = () => {
     isFetching: edgesFetching,
   } = useEdges();
 
-  // Загружаем детали выбранного edge
   const {
     data: edgeDetails,
     isLoading: edgeLoading,
