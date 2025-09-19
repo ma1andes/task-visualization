@@ -1,0 +1,9 @@
+services:
+  task-visualization:
+    build: .
+    ports:
+      - "3000:80"
+    container_name: task-visualization-app
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
