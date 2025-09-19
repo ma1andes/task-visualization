@@ -7,9 +7,7 @@ import type {
   CurrentApiResponse,
 } from "../types";
 
-const API_BASE_URL = import.meta.env.DEV
-  ? "/api"
-  : "https://drill.greact.ru/api";
+const API_BASE_URL = "/api";
 
 export const fetchEdges = async (): Promise<EdgesApiResponse> => {
   try {
@@ -98,12 +96,15 @@ export const fetchEdgeDetails = async (
     throw new Error(`Edge с ID ${id} не найден`);
   }
 
-  const currentResponse = await fetch(`${API_BASE_URL}/current?edge=${id}`, {
-    headers: {
-      Accept: "application/json",
-    },
-    credentials: "omit",
-  });
+  const currentResponse = await fetch(
+    `${API_BASE_URL}/current?edge=${encodeURIComponent(id)}`,
+    {
+      headers: {
+        Accept: "application/json",
+      },
+      credentials: "omit",
+    }
+  );
 
   if (!currentResponse.ok) {
     throw new Error(

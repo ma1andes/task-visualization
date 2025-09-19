@@ -2,17 +2,19 @@ import React from "react";
 import type { Tag } from "../types";
 import "./TagSelector.css";
 
-interface TagSelectorProps {
+interface HistoryTagsSelectorProps {
   tags: Tag[];
   selectedTags: string[];
+  colorMap: Record<string, string>;
   onTagToggle: (tagId: string) => void;
   onSelectAll: () => void;
   onDeselectAll: () => void;
 }
 
-const TagSelector: React.FC<TagSelectorProps> = ({
+const HistoryTagsSelector: React.FC<HistoryTagsSelectorProps> = ({
   tags,
   selectedTags,
+  colorMap,
   onTagToggle,
   onSelectAll,
   onDeselectAll,
@@ -23,7 +25,7 @@ const TagSelector: React.FC<TagSelectorProps> = ({
   return (
     <div className="tag-selector">
       <div className="tag-selector-header">
-        <h2 className="tag-selector-title">Параметры</h2>
+        <h2 className="tag-selector-title">Теги для графиков</h2>
         <div className="tag-selector-stats">
           {selectedCount} из {totalCount} выбрано
         </div>
@@ -49,14 +51,10 @@ const TagSelector: React.FC<TagSelectorProps> = ({
       <div className="tag-list">
         {tags.map((tag) => {
           const isSelected = selectedTags.includes(tag.id);
-          const tagTypeClass = `tag-type-${tag.type}`;
-
           return (
             <div
               key={tag.id}
-              className={`tag-item ${tagTypeClass} ${
-                isSelected ? "selected" : ""
-              }`}
+              className={`tag-item ${isSelected ? "selected" : ""}`}
               onClick={() => onTagToggle(tag.id)}
             >
               <div className="tag-checkbox">
@@ -75,7 +73,19 @@ const TagSelector: React.FC<TagSelectorProps> = ({
               </div>
 
               <div className="tag-info">
-                <div className="tag-name">{tag.name}</div>
+                <div className="tag-name">
+                  <span
+                    style={{
+                      display: "inline-block",
+                      width: 10,
+                      height: 10,
+                      borderRadius: 2,
+                      background: colorMap[tag.id] || "#8884d8",
+                      marginRight: 8,
+                    }}
+                  />
+                  {tag.name}
+                </div>
                 <div className="tag-meta">
                   <span className="tag-type">{tag.type}</span>
                   {tag.unit && <span className="tag-unit">{tag.unit}</span>}
@@ -89,4 +99,4 @@ const TagSelector: React.FC<TagSelectorProps> = ({
   );
 };
 
-export default TagSelector;
+export default HistoryTagsSelector;

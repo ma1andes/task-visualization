@@ -1,19 +1,20 @@
 import { useQuery } from "@tanstack/react-query";
 import type { CurrentApiResponse, Tag } from "../types";
 
-const API_BASE_URL = import.meta.env.DEV
-  ? "/api"
-  : "https://drill.greact.ru/api";
+const API_BASE_URL = "/api";
 export const fetchCurrents = async (edgeId: string): Promise<Tag[]> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/current?edge=${edgeId}`, {
-      method: "GET",
-      mode: "cors",
-      headers: {
-        Accept: "application/json",
-      },
-      credentials: "omit",
-    });
+    const response = await fetch(
+      `${API_BASE_URL}/current?edge=${encodeURIComponent(edgeId)}`,
+      {
+        method: "GET",
+        mode: "cors",
+        headers: {
+          Accept: "application/json",
+        },
+        credentials: "omit",
+      }
+    );
 
     if (!response.ok) {
       throw new Error(

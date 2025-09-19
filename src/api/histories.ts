@@ -1,19 +1,20 @@
 import { useQuery } from "@tanstack/react-query";
 import type { HistoryApiResponse } from "../types";
 
-const API_BASE_URL = import.meta.env.DEV
-  ? "/api"
-  : "https://drill.greact.ru/api";
+const API_BASE_URL = "/api";
 
 export const fetchHistories = async (
   edgeId: string
 ): Promise<HistoryApiResponse> => {
-  const response = await fetch(`${API_BASE_URL}/history?edge=${edgeId}`, {
-    headers: {
-      Accept: "application/json",
-    },
-    credentials: "omit",
-  });
+  const response = await fetch(
+    `${API_BASE_URL}/history?edge=${encodeURIComponent(edgeId)}`,
+    {
+      headers: {
+        Accept: "application/json",
+      },
+      credentials: "omit",
+    }
+  );
 
   if (!response.ok) {
     throw new Error(
