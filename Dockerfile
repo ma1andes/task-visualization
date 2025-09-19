@@ -1,5 +1,5 @@
-# Используем официальный Node.js образ
-FROM node:18-alpine
+# Используем актуальный LTS-образ Node.js
+FROM node:lts-alpine
 
 # Устанавливаем рабочую директорию
 WORKDIR /app
@@ -8,7 +8,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Устанавливаем зависимости
-RUN npm config set strict-ssl false && npm ci
+RUN npm ci
 
 # Копируем исходный код
 COPY . .

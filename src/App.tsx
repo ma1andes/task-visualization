@@ -18,7 +18,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <div className="app">
         <AppRouter />
-        <ReactQueryDevtools initialIsOpen={false} />
+        {import.meta.env.DEV && <ReactQueryDevtools initialIsOpen={false} />}
       </div>
     </QueryClientProvider>
   );

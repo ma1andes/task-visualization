@@ -63,7 +63,10 @@ const TagSelector: React.FC<TagSelectorProps> = ({
                 <input
                   type="checkbox"
                   checked={isSelected}
-                  onChange={() => onTagToggle(tag.id)}
+                  onChange={(e) => {
+                    e.stopPropagation();
+                    onTagToggle(tag.id);
+                  }}
                   className="checkbox-input"
                 />
                 <div className="checkbox-custom">
