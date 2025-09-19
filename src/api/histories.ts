@@ -6,12 +6,15 @@ const API_BASE_URL = "/api";
 export const fetchHistories = async (
   edgeId: string
 ): Promise<HistoryApiResponse> => {
-  const response = await fetch(`${API_BASE_URL}/history?edge=${edgeId}`, {
-    headers: {
-      Accept: "application/json",
-    },
-    credentials: "omit",
-  });
+  const response = await fetch(
+    `${API_BASE_URL}/history?edge=${encodeURIComponent(edgeId)}`,
+    {
+      headers: {
+        Accept: "application/json",
+      },
+      credentials: "omit",
+    }
+  );
 
   if (!response.ok) {
     throw new Error(

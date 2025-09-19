@@ -1,5 +1,5 @@
-# Используем официальный Node.js образ
-FROM node:18-alpine
+# Используем Node.js 20 (совместимо с Vite 7)
+FROM node:20-alpine as build
 
 # Устанавливаем рабочую директорию
 WORKDIR /app
@@ -8,7 +8,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Устанавливаем зависимости
-RUN npm config set strict-ssl false && npm ci
+RUN npm config set strict-ssl false && npm install --no-audit --no-fund
 
 # Копируем исходный код
 COPY . .
@@ -20,7 +20,7 @@ RUN npm run build
 FROM nginx:alpine
 
 # Копируем собранное приложение в nginx
-COPY --from=0 /app/dist /usr/share/nginx/html
+COPY --from=build /app/dist /usr/share/nginx/html
 
 # Копируем конфигурацию nginx c прокси /api и отключением SSL проверки
 COPY nginx.conf /etc/nginx/nginx.conf
