@@ -22,8 +22,8 @@ FROM nginx:alpine
 # Копируем собранное приложение в nginx
 COPY --from=0 /app/dist /usr/share/nginx/html
 
-# Копируем конфигурацию nginx (опционально)
-# COPY nginx.conf /etc/nginx/nginx.conf
+# Копируем конфигурацию nginx c прокси /api и отключением SSL проверки
+COPY nginx.conf /etc/nginx/nginx.conf
 
 # Открываем порт 80
 EXPOSE 80

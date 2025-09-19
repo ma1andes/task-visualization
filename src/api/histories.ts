@@ -1,9 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import type { HistoryApiResponse } from "../types";
 
-const API_BASE_URL = import.meta.env.DEV
-  ? "/api"
-  : "https://drill.greact.ru/api";
+const API_BASE_URL = "/api";
 
 export const fetchHistories = async (
   edgeId: string

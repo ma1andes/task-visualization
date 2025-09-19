@@ -7,9 +7,7 @@ import type {
   CurrentApiResponse,
 } from "../types";
 
-const API_BASE_URL = import.meta.env.DEV
-  ? "/api"
-  : "https://drill.greact.ru/api";
+const API_BASE_URL = "/api";
 
 export const fetchEdges = async (): Promise<EdgesApiResponse> => {
   try {
