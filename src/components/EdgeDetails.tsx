@@ -1,6 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import type { Edge, Tag } from "../types";
+import { getEdgeTypeIcon, getEdgeTypeName } from "../utils/edgeUtils";
 import "./EdgeDetails.css";
 
 interface EdgeDetailsProps {
@@ -14,36 +15,6 @@ const EdgeDetails: React.FC<EdgeDetailsProps> = ({
   tags,
   isLoading = false,
 }) => {
-  const getEdgeTypeIcon = (type: Edge["type"]) => {
-    switch (type) {
-      case "star":
-        return "⭐";
-      case "supernova":
-        return "💥";
-      case "neutron_star":
-        return "⚡";
-      case "black_hole":
-        return "🕳️";
-      default:
-        return "🌟";
-    }
-  };
-
-  const getEdgeTypeName = (type: Edge["type"]) => {
-    switch (type) {
-      case "star":
-        return "Звезда";
-      case "supernova":
-        return "Сверхновая";
-      case "neutron_star":
-        return "Нейтронная звезда";
-      case "black_hole":
-        return "Чёрная дыра";
-      default:
-        return "Неизвестно";
-    }
-  };
-
   const getBooleanIndicator = (value: boolean) => {
     return (
       <div className={`boolean-indicator ${value ? "true" : "false"}`}>

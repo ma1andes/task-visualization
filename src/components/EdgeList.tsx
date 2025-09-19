@@ -1,5 +1,6 @@
 import React from "react";
 import type { Edge } from "../types";
+import { getEdgeTypeIcon, getEdgeTypeName } from "../utils/edgeUtils";
 import "./EdgeList.css";
 
 interface EdgeListProps {
@@ -15,36 +16,6 @@ const EdgeList: React.FC<EdgeListProps> = ({
   onEdgeSelect,
   isLoading = false,
 }) => {
-  const getEdgeTypeIcon = (type: Edge["type"]) => {
-    switch (type) {
-      case "star":
-        return "⭐";
-      case "supernova":
-        return "💥";
-      case "neutron_star":
-        return "⚡";
-      case "black_hole":
-        return "🕳️";
-      default:
-        return "🌟";
-    }
-  };
-
-  const getEdgeTypeName = (type: Edge["type"]) => {
-    switch (type) {
-      case "star":
-        return "Звезда";
-      case "supernova":
-        return "Сверхновая";
-      case "neutron_star":
-        return "Нейтронная звезда";
-      case "black_hole":
-        return "Чёрная дыра";
-      default:
-        return "Неизвестно";
-    }
-  };
-
   if (isLoading) {
     return (
       <div className="edge-list">

@@ -2,26 +2,10 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useHistories } from "../api/histories";
 import type { Tag } from "../types";
+import { createColorMapForTags } from "../utils/edgeUtils";
 import HistoryTagsSelector from "../components/HistoryTagsSelector";
 import HistoryGraph from "../components/HistoryGraph";
 import "./CurrentsPage.css";
-
-// Генератор стабильной палитры
-const DEFAULT_COLORS = [
-  "#ef4444",
-  "#3b82f6",
-  "#10b981",
-  "#f59e0b",
-  "#8b5cf6",
-  "#ec4899",
-  "#14b8a6",
-  "#f97316",
-  "#22c55e",
-  "#eab308",
-];
-
-const pickColor = (index: number) =>
-  DEFAULT_COLORS[index % DEFAULT_COLORS.length];
 
 const HistoriesPage: React.FC = () => {
   const { edgeId } = useParams<{ edgeId: string }>();
@@ -144,9 +128,8 @@ const HistoriesPage: React.FC = () => {
   const handleDeselectAll = () => setSelectedTags([]);
 
   const colorMap = useMemo(() => {
-    const map: Record<string, string> = {};
-    tags.forEach((t, i) => (map[t.id] = pickColor(i)));
-    return map;
+    const tagIds = tags.map((tag) => tag.id);
+    return createColorMapForTags(tagIds);
   }, [tags]);
 
   if (error) {

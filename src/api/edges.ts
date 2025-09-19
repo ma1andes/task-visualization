@@ -6,6 +6,8 @@ import type {
   Tag,
   CurrentApiResponse,
 } from "../types";
+import { createEdgeFromId } from "../utils/edgeUtils";
+import { convertTagValue, getTagTypeInfo } from "../utils/tagTypeUtils";
 
 const API_BASE_URL = "/api";
 
@@ -28,18 +30,9 @@ export const fetchEdges = async (): Promise<EdgesApiResponse> => {
 
     const simpleResponse: EdgesSimpleResponse = await response.json();
 
-    const edges: Edge[] = simpleResponse.map((edgeId, index) => ({
-      id: edgeId,
-      name: `Объект ${edgeId}`,
-      type:
-        index % 4 === 0
-          ? "star"
-          : index % 4 === 1
-          ? "supernova"
-          : index % 4 === 2
-          ? "neutron_star"
-          : "black_hole",
-    }));
+    const edges: Edge[] = simpleResponse.map((edgeId, index) =>
+      createEdgeFromId(edgeId, index)
+    );
 
     return {
       edges,
@@ -78,18 +71,9 @@ export const fetchEdgeDetails = async (
   }
 
   const simpleResponse: EdgesSimpleResponse = await edgesResponse.json();
-  const edges: Edge[] = simpleResponse.map((edgeId, index) => ({
-    id: edgeId,
-    name: `Объект ${edgeId}`,
-    type:
-      index % 4 === 0
-        ? "star"
-        : index % 4 === 1
-        ? "supernova"
-        : index % 4 === 2
-        ? "neutron_star"
-        : "black_hole",
-  }));
+  const edges: Edge[] = simpleResponse.map((edgeId, index) =>
+    createEdgeFromId(edgeId, index)
+  );
 
   const edge = edges.find((e) => e.id === id);
   if (!edge) {
@@ -114,45 +98,20 @@ export const fetchEdgeDetails = async (
 
   const currentData: CurrentApiResponse = await currentResponse.json();
 
-  const apiTags: Tag[] = Object.entries(currentData).map(
-    ([tagName, value]) => ({
+  const apiTags: Tag[] = Object.entries(currentData).map(([tagName, value]) => {
+    const tagTypeInfo = getTagTypeInfo(tagName);
+    const convertedValue = convertTagValue(value, tagName);
+
+    return {
       id: tagName,
       name: tagName,
-      type:
-        typeof value === "boolean"
-          ? "boolean"
-          : typeof value === "number"
-          ? "number"
-          : "string",
-      value: value,
-    })
-  );
+      type: tagTypeInfo.type,
+      value: convertedValue,
+      description: tagTypeInfo.description,
+    };
+  });
 
-  const mockBooleanTags: Tag[] = [
-    {
-      id: "relativistic_jet",
-      name: "MOCK: Выброс релятивистского джета",
-      type: "boolean",
-      description: "Активность релятивистского джета",
-      value: Math.random() > 0.5,
-    },
-    {
-      id: "accretion_disk_active",
-      name: "MOCK:Аккреционный диск активен",
-      type: "boolean",
-      description: "Состояние аккреционного диска",
-      value: Math.random() > 0.3,
-    },
-    {
-      id: "magnetic_field_stable",
-      name: "MOCK: Магнитное поле стабильно",
-      type: "boolean",
-      description: "Стабильность магнитного поля",
-      value: Math.random() > 0.7,
-    },
-  ];
-
-  const tags: Tag[] = [...apiTags, ...mockBooleanTags];
+  const tags: Tag[] = apiTags;
 
   return { edge, tags };
 };
