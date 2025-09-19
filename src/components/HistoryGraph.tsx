@@ -21,7 +21,7 @@ const HistoryGraph: React.FC<HistoryGraphProps> = ({
   data,
   selectedTags,
   colorMap,
-  height = 420,
+  height = "100%",
 }) => {
   const formatXAxis = (value: unknown) => {
     if (typeof value === "number") {
