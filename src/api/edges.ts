@@ -30,9 +30,9 @@ export const fetchEdges = async (): Promise<EdgesApiResponse> => {
 
     const simpleResponse: EdgesSimpleResponse = await response.json();
 
-    const edges: Edge[] = simpleResponse.map((edgeId, index) =>
-      createEdgeFromId(edgeId, index)
-    );
+    const edges: Edge[] = simpleResponse
+      .map((edgeId) => createEdgeFromId(edgeId))
+      .sort((a, b) => a.id.localeCompare(b.id));
 
     return {
       edges,
@@ -71,8 +71,8 @@ export const fetchEdgeDetails = async (
   }
 
   const simpleResponse: EdgesSimpleResponse = await edgesResponse.json();
-  const edges: Edge[] = simpleResponse.map((edgeId, index) =>
-    createEdgeFromId(edgeId, index)
+  const edges: Edge[] = simpleResponse.map((edgeId) =>
+    createEdgeFromId(edgeId)
   );
 
   const edge = edges.find((e) => e.id === id);

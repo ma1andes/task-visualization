@@ -61,7 +61,30 @@ export const getEdgeTypeColor = (type: Edge["type"]): string => {
 };
 
 /**
+ * Определить тип edge по ID (стабильный тип для каждого edge)
+ */
+export const getEdgeTypeById = (edgeId: string): Edge["type"] => {
+  const types: Edge["type"][] = [
+    "star",
+    "supernova",
+    "neutron_star",
+    "black_hole",
+  ];
+
+  // Создаем стабильный хеш из ID для определения типа
+  let hash = 0;
+  for (let i = 0; i < edgeId.length; i++) {
+    const char = edgeId.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash = hash & hash; // Конвертируем в 32-битное целое
+  }
+
+  return types[Math.abs(hash) % 4];
+};
+
+/**
  * Определить тип edge по индексу (для совместимости с существующим API)
+ * @deprecated Используйте getEdgeTypeById для стабильных типов
  */
 export const getEdgeTypeByIndex = (index: number): Edge["type"] => {
   const types: Edge["type"][] = [
@@ -74,13 +97,13 @@ export const getEdgeTypeByIndex = (index: number): Edge["type"] => {
 };
 
 /**
- * Создать edge объект из ID и индекса
+ * Создать edge объект из ID
  */
-export const createEdgeFromId = (edgeId: string, index: number): Edge => {
+export const createEdgeFromId = (edgeId: string): Edge => {
   return {
     id: edgeId,
     name: `Объект ${edgeId}`,
-    type: getEdgeTypeByIndex(index),
+    type: getEdgeTypeById(edgeId),
   };
 };
 
