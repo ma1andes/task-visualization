@@ -33,3 +33,6 @@ export interface HistoryApiResponse {
 export interface NavigationProps {
   edgeId: string;
 }
+
+// Экспорт типов виджетов
+export * from "./types/widgets";

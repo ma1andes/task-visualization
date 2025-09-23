@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import type { Edge, Tag } from "../types";
-import { getEdgeTypeIcon, getEdgeTypeName } from "../utils/edgeUtils";
+import type { Edge, Tag } from "../../types";
+import { getEdgeTypeIcon, getEdgeTypeName } from "../../utils/edgeUtils";
 import "./EdgeDetails.css";
 
 interface EdgeDetailsProps {

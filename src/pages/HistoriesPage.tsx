@@ -3,8 +3,8 @@ import { Link, useParams } from "react-router-dom";
 import { useHistories } from "../api/histories";
 import type { Tag } from "../types";
 import { createColorMapForTags } from "../utils/edgeUtils";
-import HistoryTagsSelector from "../components/HistoryTagsSelector";
-import HistoryGraph from "../components/HistoryGraph";
+import HistoryTagsSelector from "../components/history/HistoryTagsSelector";
+import HistoryGraph from "../components/history/HistoryGraph";
 import "./CurrentsPage.css";
 
 const HistoriesPage: React.FC = () => {

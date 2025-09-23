@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useCurrents } from "../api/currents";
-import TagSelector from "../components/TagSelector";
-import TagVisualization from "../components/TagVisualization";
+import TagSelector from "../components/common/TagSelector";
+import { WidgetFactory } from "../components/widgets";
 import "./CurrentsPage.css";
 
 const CurrentsPage: React.FC = () => {
@@ -130,7 +130,7 @@ const CurrentsPage: React.FC = () => {
           ) : (
             <div className="visualization-grid">
               {selectedTagsData.map((tag) => (
-                <TagVisualization key={tag.id} tag={tag} />
+                <WidgetFactory key={tag.id} tag={tag} />
               ))}
             </div>
           )}

@@ -1,6 +1,6 @@
 import React from "react";
-import type { Edge } from "../types";
-import { getEdgeTypeIcon, getEdgeTypeName } from "../utils/edgeUtils";
+import type { Edge } from "../../types";
+import { getEdgeTypeIcon, getEdgeTypeName } from "../../utils/edgeUtils";
 import "./EdgeList.css";
 
 interface EdgeListProps {
