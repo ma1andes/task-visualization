@@ -1,0 +1,217 @@
+.alarm-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+}
+
+.alarm-panel {
+  position: relative;
+  width: 100px;
+  height: 80px;
+  border: 3px solid #333;
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.alarm-inactive {
+  background: linear-gradient(145deg, #374151, #1f2937);
+  border-color: #6b7280;
+}
+
+.alarm-active {
+  background: linear-gradient(145deg, #dc2626, #991b1b);
+  border-color: #ef4444;
+  animation: alarmFlash 1s infinite;
+}
+
+.alarm-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+}
+
+.warning-triangle {
+  width: 40px;
+  height: 35px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.warning-triangle::before {
+  content: "";
+  position: absolute;
+  width: 0;
+  height: 0;
+  border-left: 20px solid transparent;
+  border-right: 20px solid transparent;
+  border-bottom: 35px solid #fbbf24;
+  transition: all 0.3s ease;
+}
+
+.alarm-active .warning-triangle::before {
+  border-bottom-color: #ffffff;
+  animation: trianglePulse 0.5s infinite;
+}
+
+.exclamation {
+  position: relative;
+  z-index: 3;
+  color: #1f2937;
+  font-size: 1.2rem;
+  font-weight: 900;
+  margin-top: 8px;
+  transition: all 0.3s ease;
+}
+
+.alarm-active .exclamation {
+  color: #dc2626;
+  animation: exclamationBlink 0.5s infinite;
+}
+
+.alarm-stripes {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 8px,
+    rgba(0, 0, 0, 0.1) 8px,
+    rgba(0, 0, 0, 0.1) 16px
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.alarm-active .alarm-stripes {
+  opacity: 1;
+  animation: stripesMove 2s linear infinite;
+}
+
+.alarm-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.alarm-status {
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 2px;
+  padding: 6px 16px;
+  border-radius: 20px;
+  transition: all 0.3s ease;
+}
+
+.status-normal {
+  color: #22c55e;
+  background: rgba(34, 197, 94, 0.1);
+  border: 1px solid rgba(34, 197, 94, 0.3);
+}
+
+.status-alarm {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  animation: statusBlink 1s infinite;
+}
+
+.alarm-level {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+}
+
+.level-label {
+  color: #9ca3af;
+}
+
+.level-value {
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.level-safe {
+  color: #22c55e;
+  background: rgba(34, 197, 94, 0.1);
+}
+
+.level-critical {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.2);
+  animation: levelPulse 1s infinite;
+}
+
+@keyframes alarmFlash {
+  0%,
+  100% {
+    background: linear-gradient(145deg, #dc2626, #991b1b);
+    box-shadow: 0 0 20px rgba(220, 38, 38, 0.6);
+  }
+  50% {
+    background: linear-gradient(145deg, #ef4444, #dc2626);
+    box-shadow: 0 0 40px rgba(239, 68, 68, 0.8);
+  }
+}
+
+@keyframes trianglePulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+@keyframes exclamationBlink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+@keyframes stripesMove {
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 32px 32px;
+  }
+}
+
+@keyframes statusBlink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes levelPulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}

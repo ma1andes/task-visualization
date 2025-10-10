@@ -1,5 +1,5 @@
 import React from "react";
-import type { Tag } from "../types";
+import type { Tag } from "../../types";
 import "./TagVisualization.css";
 
 interface TagVisualizationProps {
