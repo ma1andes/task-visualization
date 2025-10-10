@@ -82,19 +82,6 @@ export const getEdgeTypeById = (edgeId: string): Edge["type"] => {
   return types[Math.abs(hash) % 4];
 };
 
-/**
- * Определить тип edge по индексу (для совместимости с существующим API)
- * @deprecated Используйте getEdgeTypeById для стабильных типов
- */
-export const getEdgeTypeByIndex = (index: number): Edge["type"] => {
-  const types: Edge["type"][] = [
-    "star",
-    "supernova",
-    "neutron_star",
-    "black_hole",
-  ];
-  return types[index % 4];
-};
 
 /**
  * Создать edge объект из ID

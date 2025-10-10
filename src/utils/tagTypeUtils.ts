@@ -4,17 +4,15 @@ const BOOLEAN_PATTERNS = [
   /^pump\d+_bits/i,
   /^PC_IO_/i,
   /^A\[\d+\]\.\d+$/i, // A[2].31
-  // DC_out_100ms и DC_in_100ms теги с точками - это boolean
-  /^DC_out_100ms\[\d+\]\.\d+$/i,
-  /^DC_in_100ms\[\d+\]\.\d+$/i,
 ];
 
 const NUMBER_PATTERNS = [
   /_spm$/i,
   /_feed$/i,
   /_Amps$/i, // Добавляем паттерн для амперов
-  // DC_out_100ms и DC_in_100ms теги БЕЗ точек - это number
-  /^DC_out_100ms\[\d+\]$/i,
+  // DC_out_100ms и DC_in_100ms теги - это number (и с точками и без)
+  /^DC_out_100ms\[\d+\](\.\d+)?$/i,
+  /^DC_in_100ms\[\d+\](\.\d+)?$/i,
   /^DC_in_100ms\[8[4-8]\]$/i, // DINT теги
 ];
 

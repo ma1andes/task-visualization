@@ -1,7 +1,12 @@
 import React from "react";
-import type { Tag } from "../../../types";
+import type { Tag, HistoryApiResponse } from "../../../types";
 import { WidgetType } from "../../../types/widgets";
-import { getTagWidgetInfo } from "../../../utils/widgetUtils";
+import type { TagCustomization } from "../../../types/customization";
+import {
+  getTagWidgetInfoWithCustomization,
+  getTagWidgetInfoByKey,
+  getImageUrlFromCustomization,
+} from "../../../utils/widgetUtils";
 
 // Импорт всех виджетов
 import {
@@ -15,12 +20,14 @@ import {
   LiquidFill,
   BarChart,
   AreaChart,
+  ProgressBar,
   DigitalDisplay,
   Counter,
   Histogram,
   RadarChart,
 } from "../index";
 import type { BaseWidgetProps } from "./BaseWidget";
+import ImageWidget from "./ImageWidget";
 
 // Маппинг типов виджетов к компонентам
 const WIDGET_COMPONENTS: Record<
@@ -40,6 +47,7 @@ const WIDGET_COMPONENTS: Record<
   [WidgetType.LIQUID_FILL]: LiquidFill,
   [WidgetType.BAR_CHART]: BarChart,
   [WidgetType.AREA_CHART]: AreaChart,
+  [WidgetType.PROGRESS_BAR]: ProgressBar,
 
   // DINT виджеты
   [WidgetType.DIGITAL_DISPLAY]: DigitalDisplay,
@@ -50,19 +58,30 @@ const WIDGET_COMPONENTS: Record<
 
 interface WidgetFactoryProps {
   tag: Tag;
+  customizations?: TagCustomization[];
+  widgetKey?: string; // Если указан, используется конкретный виджет
+  historyData?: HistoryApiResponse; // История для графиков
   className?: string;
   style?: React.CSSProperties;
 }
 
 /**
  * Фабрика виджетов - динамически создает подходящий виджет для тега
+ * Если указан widgetKey, создаёт виджет для конкретного ключа
+ * Иначе использует первый найденный виджет
  */
 const WidgetFactory: React.FC<WidgetFactoryProps> = ({
   tag,
+  customizations,
+  widgetKey,
+  historyData,
   className,
   style,
 }) => {
-  const widgetInfo = getTagWidgetInfo(tag);
+  // Если указан конкретный ключ виджета - используем его
+  const widgetInfo = widgetKey && customizations
+    ? getTagWidgetInfoByKey(tag, widgetKey, customizations)
+    : getTagWidgetInfoWithCustomization(tag, customizations);
 
   if (!widgetInfo) {
     return (
@@ -85,7 +104,31 @@ const WidgetFactory: React.FC<WidgetFactoryProps> = ({
     );
   }
 
-  if (!widgetInfo.isCompatible) {
+  // Если это картинка
+  if (widgetInfo.isImage) {
+    // Пытаемся получить imageUrl из widgetInfo или из customizations
+    const imageUrlFromInfo = 
+      ("imageUrl" in widgetInfo && typeof widgetInfo.imageUrl === "string") 
+        ? widgetInfo.imageUrl 
+        : null;
+    const imageUrlFromCustomizations = customizations 
+      ? getImageUrlFromCustomization(tag.id, customizations) 
+      : null;
+    const imageUrl = imageUrlFromInfo || imageUrlFromCustomizations;
+
+    if (typeof imageUrl === "string") {
+      return (
+        <ImageWidget
+          tag={tag}
+          imageUrl={imageUrl}
+          params={widgetInfo.params || undefined}
+          className={className}
+          style={style}
+        />
+      );
+    }
+
+    // Если URL не найден
     return (
       <div className={`widget-error ${className}`} style={style}>
         <div
@@ -98,20 +141,14 @@ const WidgetFactory: React.FC<WidgetFactoryProps> = ({
             borderRadius: "8px",
           }}
         >
-          <h4>Несовместимый виджет</h4>
-          <p>
-            Виджет "{widgetInfo.config.name}" не совместим с типом данных "
-            {tag.type}"
-          </p>
-          <small>
-            Ожидаемые типы: {widgetInfo.config.dataTypes.join(", ")}
-          </small>
+          <h4>URL изображения не найден</h4>
+          <p>Для тега "{tag.name}" указан виджет-картинка, но URL не найден</p>
         </div>
       </div>
     );
   }
 
-  const WidgetComponent = WIDGET_COMPONENTS[widgetInfo.widgetType];
+  const WidgetComponent = WIDGET_COMPONENTS[widgetInfo.widgetType as WidgetType];
 
   if (!WidgetComponent) {
     return (
@@ -133,7 +170,15 @@ const WidgetFactory: React.FC<WidgetFactoryProps> = ({
     );
   }
 
-  return <WidgetComponent tag={tag} className={className} style={style} />;
+  return (
+    <WidgetComponent
+      tag={tag}
+      params={widgetInfo.params || undefined}
+      historyData={historyData}
+      className={className}
+      style={style}
+    />
+  );
 };
 
 export default WidgetFactory;

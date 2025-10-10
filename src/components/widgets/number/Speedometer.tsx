@@ -2,11 +2,25 @@ import React, { useMemo } from "react";
 import ReactECharts from "echarts-for-react";
 import WidgetContainer from "../common/BaseWidget";
 import type { BaseWidgetProps } from "../common/BaseWidget";
+import { normalizeColor, createSpeedometerColors } from "../../../utils/colorUtils";
 
-const Speedometer: React.FC<BaseWidgetProps> = ({ tag, className, style }) => {
+const Speedometer: React.FC<BaseWidgetProps> = ({
+  tag,
+  params,
+  className,
+  style,
+}) => {
   const value = tag.value as number;
-  const maxValue = Math.max(1000, Math.ceil(value * 1.2));
-  // const normalizedValue = Math.max(value, 0);
+  
+  // Используем параметры из кастомизации или дефолтные значения
+  const minValue = params?.min !== undefined ? Number(params.min) : 0;
+  const maxValue = params?.max !== undefined 
+    ? Number(params.max) 
+    : Math.max(1000, Math.ceil(value * 1.2));
+  
+  // Используем цвет из кастомизации или дефолтную схему
+  const chartColor = normalizeColor(params?.color as string | undefined, "#22c55e");
+  const speedometerColors = createSpeedometerColors(chartColor);
 
   const option = useMemo(
     () => ({
@@ -16,7 +30,7 @@ const Speedometer: React.FC<BaseWidgetProps> = ({ tag, className, style }) => {
           type: "gauge",
           center: ["50%", "75%"],
           radius: "90%",
-          min: 0,
+          min: minValue,
           max: maxValue,
           startAngle: 200,
           endAngle: -20,
@@ -48,12 +62,7 @@ const Speedometer: React.FC<BaseWidgetProps> = ({ tag, className, style }) => {
           axisLine: {
             lineStyle: {
               width: 20,
-              color: [
-                [0.2, "#22c55e"],
-                [0.5, "#3b82f6"],
-                [0.8, "#f59e0b"],
-                [1, "#ef4444"],
-              ],
+              color: speedometerColors,
             },
           },
           pointer: {
@@ -126,7 +135,7 @@ const Speedometer: React.FC<BaseWidgetProps> = ({ tag, className, style }) => {
         },
       ],
     }),
-    [value, maxValue, tag.unit]
+    [value, minValue, maxValue, tag.unit, speedometerColors]
   );
 
   return (

@@ -12,6 +12,7 @@ const WidgetType = {
   LIQUID_FILL: "liquid_fill",
   BAR_CHART: "bar_chart",
   AREA_CHART: "area_chart",
+  PROGRESS_BAR: "progress_bar",
 
   // Виджеты для DINT данных (большие числа)
   DIGITAL_DISPLAY: "digital_display",
@@ -35,5 +36,5 @@ export interface WidgetConfig {
 export interface TagWidgetAssignment {
   tagId: string;
   widgetType: WidgetType;
-  config?: Record<string, any>;
+  config?: Record<string, unknown>;
 }

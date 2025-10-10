@@ -2,30 +2,78 @@ import React, { useMemo } from "react";
 import ReactECharts from "echarts-for-react";
 import WidgetContainer from "../common/BaseWidget";
 import type { BaseWidgetProps } from "../common/BaseWidget";
+import { normalizeColor, createAreaGradient } from "../../../utils/colorUtils";
 
-const AreaChart: React.FC<BaseWidgetProps> = ({ tag, className, style }) => {
+interface HistoryPoint {
+  timestamp?: number | string;
+  time?: number | string;
+  t?: number | string;
+  ts?: number | string;
+  value?: number;
+  v?: number;
+}
+
+const AreaChart: React.FC<BaseWidgetProps> = ({
+  tag,
+  params,
+  historyData,
+  className,
+  style,
+}) => {
   const value = tag.value as number;
+  
+  // Используем параметры из кастомизации для настройки диапазона
+  const minValue = params?.min !== undefined ? Number(params.min) : undefined;
+  const maxValue = params?.max !== undefined ? Number(params.max) : undefined;
+  
+  // Используем цвет из кастомизации или дефолтный оранжевый
+  const chartColor = normalizeColor(params?.color as string | undefined, "#f97316");
 
-  // Генерируем историю значений для демонстрации
-  const generateHistoryData = (currentValue: number) => {
-    const points = 20;
-    const data = [];
-    const baseValue = currentValue;
-
-    for (let i = 0; i < points; i++) {
-      const variation =
-        (Math.sin(i * 0.3) + Math.random() * 0.4 - 0.2) * baseValue * 0.3;
-      const pointValue = Math.max(0, baseValue + variation);
-      data.push(pointValue);
+  // Извлекаем историю для этого тега из API
+  const { chartData, xAxisData } = useMemo(() => {
+    if (!historyData || !historyData[tag.id]) {
+      // Если нет истории - показываем только текущее значение
+      return {
+        chartData: [value],
+        xAxisData: ["Сейчас"],
+      };
     }
 
-    // Последняя точка - текущее значение
-    data[points - 1] = currentValue;
-    return data;
-  };
+    const tagHistory = historyData[tag.id];
+    if (!Array.isArray(tagHistory) || tagHistory.length === 0) {
+      return {
+        chartData: [value],
+        xAxisData: ["Сейчас"],
+      };
+    }
 
-  const historyData = useMemo(() => generateHistoryData(value), [value]);
-  const xAxisData = Array.from({ length: 20 }, (_, i) => `-${19 - i}s`);
+    // Берём последние 20 точек
+    const points = tagHistory.slice(-20) as HistoryPoint[];
+    const values = points.map((p: HistoryPoint) => {
+      const val = p?.value ?? p?.v ?? null;
+      return typeof val === "number" ? val : 0;
+    });
+
+    // Форматируем временные метки
+    const timestamps = points.map((p: HistoryPoint, idx: number) => {
+      const rawTs = p?.timestamp ?? p?.time ?? p?.t ?? p?.ts;
+      if (!rawTs) return `t${idx}`;
+      
+      const ts = typeof rawTs === "number" ? rawTs : Date.parse(String(rawTs));
+      if (!Number.isFinite(ts)) return `t${idx}`;
+      
+      const date = new Date(ts);
+      const hours = String(date.getHours()).padStart(2, "0");
+      const minutes = String(date.getMinutes()).padStart(2, "0");
+      const seconds = String(date.getSeconds()).padStart(2, "0");
+      return `${hours}:${minutes}:${seconds}`;
+    });
+
+    return {
+      chartData: values,
+      xAxisData: timestamps,
+    };
+  }, [historyData, tag.id, value]);
 
   const option = useMemo(
     () => ({
@@ -55,6 +103,8 @@ const AreaChart: React.FC<BaseWidgetProps> = ({ tag, className, style }) => {
       },
       yAxis: {
         type: "value",
+        ...(minValue !== undefined && { min: minValue }),
+        ...(maxValue !== undefined && { max: maxValue }),
         axisLine: {
           show: false,
         },
@@ -79,26 +129,15 @@ const AreaChart: React.FC<BaseWidgetProps> = ({ tag, className, style }) => {
       series: [
         {
           type: "line",
-          data: historyData,
+          data: chartData,
           smooth: true,
           symbol: "none",
           lineStyle: {
             width: 3,
-            color: "#f97316",
+            color: chartColor,
           },
           areaStyle: {
-            color: {
-              type: "linear",
-              x: 0,
-              y: 0,
-              x2: 0,
-              y2: 1,
-              colorStops: [
-                { offset: 0, color: "rgba(249, 115, 22, 0.6)" },
-                { offset: 0.5, color: "rgba(249, 115, 22, 0.3)" },
-                { offset: 1, color: "rgba(249, 115, 22, 0.1)" },
-              ],
-            },
+            color: createAreaGradient(chartColor),
           },
           emphasis: {
             focus: "series",
@@ -127,9 +166,11 @@ const AreaChart: React.FC<BaseWidgetProps> = ({ tag, className, style }) => {
         textStyle: {
           color: "#ffffff",
         },
-        formatter: (params: any) => {
-          const data = params[0];
-          return `Время: ${data.name}<br/>Значение: ${data.value.toFixed(2)} ${
+        formatter: (params: unknown) => {
+          const paramsArray = params as Array<{ name: string; value: number }>;
+          const data = paramsArray[0];
+          const val = typeof data.value === "number" ? data.value : 0;
+          return `Время: ${data.name}<br/>Значение: ${val.toFixed(2)} ${
             tag.unit || "ед."
           }`;
         },
@@ -150,7 +191,7 @@ const AreaChart: React.FC<BaseWidgetProps> = ({ tag, className, style }) => {
         },
       ],
     }),
-    [historyData, xAxisData, value, tag.unit]
+    [chartData, xAxisData, value, minValue, maxValue, tag.unit, chartColor]
   );
 
   return (

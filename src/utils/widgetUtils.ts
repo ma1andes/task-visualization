@@ -1,277 +1,318 @@
 import { WidgetType } from "../types/widgets";
-import type { WidgetConfig, TagWidgetAssignment } from "../types/widgets";
 import type { Tag } from "../types";
+import type {
+  TagCustomization,
+  WidgetParams,
+} from "../types/customization";
+import {
+  parseCustomizationValue,
+  isWidgetKey,
+  normalizeWidgetName,
+  mergeParams,
+  validateParams,
+  isSafeUrl,
+} from "./customizationParser";
+
+// =============================================
+// Функции для работы с кастомизацией из API
+// =============================================
 
 /**
- * Конфигурация всех доступных виджетов
+ * Получить виджет для тега из кастомизаций API
+ * @param tagId - ID тега
+ * @param customizations - массив кастомизаций из API
+ * @returns тип виджета или null
  */
-const WIDGET_CONFIGS: Record<WidgetType, WidgetConfig> = {
-  // Boolean виджеты
-  [WidgetType.LED_INDICATOR]: {
-    type: WidgetType.LED_INDICATOR,
-    name: "LED Индикатор",
-    description: "Светодиодный индикатор включено/выключено",
-    dataTypes: ["boolean"],
-    icon: "💡",
-    color: "#22c55e",
-  },
-  [WidgetType.SWITCH_TOGGLE]: {
-    type: WidgetType.SWITCH_TOGGLE,
-    name: "Переключатель",
-    description: "Визуальный переключатель вкл/выкл",
-    dataTypes: ["boolean"],
-    icon: "🔘",
-    color: "#3b82f6",
-  },
-  [WidgetType.STATUS_LIGHT]: {
-    type: WidgetType.STATUS_LIGHT,
-    name: "Статусная лампа",
-    description: "Цветовой индикатор состояния",
-    dataTypes: ["boolean"],
-    icon: "🚦",
-    color: "#f59e0b",
-  },
-  [WidgetType.ALARM_PANEL]: {
-    type: WidgetType.ALARM_PANEL,
-    name: "Панель аварий",
-    description: "Панель сигнализации с мигающим эффектом",
-    dataTypes: ["boolean"],
-    icon: "🚨",
-    color: "#ef4444",
-  },
-
-  // Number виджеты
-  [WidgetType.THERMOMETER]: {
-    type: WidgetType.THERMOMETER,
-    name: "Термометр",
-    description: "Вертикальный термометр с заполнением",
-    dataTypes: ["number"],
-    icon: "🌡️",
-    color: "#ec4899",
-  },
-  [WidgetType.GAUGE]: {
-    type: WidgetType.GAUGE,
-    name: "Стрелочный индикатор",
-    description: "Круговой измерительный прибор со стрелкой",
-    dataTypes: ["number"],
-    icon: "⚡",
-    color: "#8b5cf6",
-  },
-  [WidgetType.SPEEDOMETER]: {
-    type: WidgetType.SPEEDOMETER,
-    name: "Спидометр",
-    description: "Полукруговой спидометр с цветными зонами",
-    dataTypes: ["number"],
-    icon: "📊",
-    color: "#14b8a6",
-  },
-  [WidgetType.LIQUID_FILL]: {
-    type: WidgetType.LIQUID_FILL,
-    name: "Заполнение жидкостью",
-    description: "Анимированное заполнение емкости",
-    dataTypes: ["number"],
-    icon: "🌊",
-    color: "#06b6d4",
-  },
-  [WidgetType.BAR_CHART]: {
-    type: WidgetType.BAR_CHART,
-    name: "Столбчатая диаграмма",
-    description: "Вертикальные столбцы для отображения значений",
-    dataTypes: ["number"],
-    icon: "📊",
-    color: "#10b981",
-  },
-  [WidgetType.AREA_CHART]: {
-    type: WidgetType.AREA_CHART,
-    name: "Площадная диаграмма",
-    description: "График с заполненной областью",
-    dataTypes: ["number"],
-    icon: "📈",
-    color: "#f97316",
-  },
-
-  // DINT виджеты (большие числа)
-  [WidgetType.DIGITAL_DISPLAY]: {
-    type: WidgetType.DIGITAL_DISPLAY,
-    name: "Цифровое табло",
-    description: "Цифровой дисплей с большими числами",
-    dataTypes: ["number"],
-    icon: "🔢",
-    color: "#eab308",
-  },
-  [WidgetType.COUNTER]: {
-    type: WidgetType.COUNTER,
-    name: "Счетчик",
-    description: "Анимированный счетчик с эффектами",
-    dataTypes: ["number"],
-    icon: "🔢",
-    color: "#a855f7",
-  },
-  [WidgetType.HISTOGRAM]: {
-    type: WidgetType.HISTOGRAM,
-    name: "Гистограмма",
-    description: "Распределение значений в виде гистограммы",
-    dataTypes: ["number"],
-    icon: "📊",
-    color: "#84cc16",
-  },
-  [WidgetType.RADAR_CHART]: {
-    type: WidgetType.RADAR_CHART,
-    name: "Радарная диаграмма",
-    description: "Многомерная визуализация в виде радара",
-    dataTypes: ["number"],
-    icon: "🎯",
-    color: "#f43f5e",
-  },
-};
-
-/**
- * Назначение виджетов для конкретных тегов
- * Каждый тег получает уникальный виджет
- */
-const TAG_WIDGET_ASSIGNMENTS: TagWidgetAssignment[] = [
-  // Boolean теги
-  { tagId: "PC_IO_2.30", widgetType: WidgetType.LED_INDICATOR },
-  { tagId: "PC_IO_2.12", widgetType: WidgetType.SWITCH_TOGGLE },
-  { tagId: "pump1_bits1.27", widgetType: WidgetType.STATUS_LIGHT },
-  { tagId: "pump2_bits1.27", widgetType: WidgetType.ALARM_PANEL },
-  { tagId: "PC_IO_2.31", widgetType: WidgetType.LED_INDICATOR },
-  { tagId: "PC_IO_2.13", widgetType: WidgetType.SWITCH_TOGGLE },
-  { tagId: "A[2].31", widgetType: WidgetType.STATUS_LIGHT },
-  { tagId: "PC_IO_2.25", widgetType: WidgetType.ALARM_PANEL },
-  { tagId: "PC_IO_2.26", widgetType: WidgetType.LED_INDICATOR },
-
-  // Boolean теги с точками (используем оставшиеся boolean виджеты циклично)
-  { tagId: "DC_out_100ms[140].8", widgetType: WidgetType.SWITCH_TOGGLE },
-  { tagId: "DC_out_100ms[140].10", widgetType: WidgetType.STATUS_LIGHT },
-  { tagId: "DC_in_100ms[3].24", widgetType: WidgetType.ALARM_PANEL },
-  { tagId: "DC_in_100ms[3].25", widgetType: WidgetType.LED_INDICATOR },
-  { tagId: "DC_out_100ms[140].9", widgetType: WidgetType.SWITCH_TOGGLE },
-  { tagId: "DC_out_100ms[141].10", widgetType: WidgetType.STATUS_LIGHT },
-  { tagId: "DC_in_100ms[3].16", widgetType: WidgetType.ALARM_PANEL },
-  { tagId: "DC_out_100ms[141].8", widgetType: WidgetType.LED_INDICATOR },
-  { tagId: "DC_in_100ms[3].17", widgetType: WidgetType.SWITCH_TOGGLE },
-  { tagId: "DC_out_100ms[141].9", widgetType: WidgetType.STATUS_LIGHT },
-  { tagId: "DC_in_100ms[3].15", widgetType: WidgetType.ALARM_PANEL },
-  { tagId: "DC_out_100ms[140].13", widgetType: WidgetType.LED_INDICATOR },
-  { tagId: "DC_in_100ms[3].22", widgetType: WidgetType.SWITCH_TOGGLE },
-  { tagId: "DC_out_100ms[140].14", widgetType: WidgetType.STATUS_LIGHT },
-  { tagId: "DC_in_100ms[3].21", widgetType: WidgetType.ALARM_PANEL },
-  { tagId: "DC_out_100ms[141].13", widgetType: WidgetType.LED_INDICATOR },
-  { tagId: "DC_in_100ms[3].26", widgetType: WidgetType.SWITCH_TOGGLE },
-  { tagId: "DC_in_100ms[3].18", widgetType: WidgetType.STATUS_LIGHT },
-  { tagId: "DC_in_100ms[3].4", widgetType: WidgetType.ALARM_PANEL },
-  { tagId: "DC_in_100ms[3].5", widgetType: WidgetType.LED_INDICATOR },
-
-  // Number теги (int)
-  { tagId: "Pump1_Wref_spm", widgetType: WidgetType.THERMOMETER },
-  { tagId: "Pump1_Wfbk_spm", widgetType: WidgetType.GAUGE },
-  { tagId: "DC_out_100ms[70]", widgetType: WidgetType.SPEEDOMETER },
-  { tagId: "DC_out_100ms[72]", widgetType: WidgetType.LIQUID_FILL },
-  { tagId: "P1_feed", widgetType: WidgetType.BAR_CHART },
-  { tagId: "Pump2_Wfbk_spm", widgetType: WidgetType.AREA_CHART },
-  { tagId: "Pump2_Wref_spm", widgetType: WidgetType.THERMOMETER },
-  { tagId: "DC_out_100ms[74]", widgetType: WidgetType.GAUGE },
-  { tagId: "DC_out_100ms[76]", widgetType: WidgetType.SPEEDOMETER },
-  { tagId: "P2_feed", widgetType: WidgetType.LIQUID_FILL },
-  { tagId: "DC_out_100ms[144]", widgetType: WidgetType.BAR_CHART },
-  { tagId: "DC_out_100ms[146]", widgetType: WidgetType.AREA_CHART },
-  { tagId: "DC_out_100ms[148]", widgetType: WidgetType.THERMOMETER },
-  { tagId: "DC_out_100ms[164]", widgetType: WidgetType.GAUGE },
-  { tagId: "DC_out_100ms[165]", widgetType: WidgetType.SPEEDOMETER },
-
-  // DINT теги (большие числа)
-  { tagId: "DC_in_100ms[84]", widgetType: WidgetType.DIGITAL_DISPLAY },
-  { tagId: "DC_in_100ms[85]", widgetType: WidgetType.COUNTER },
-  { tagId: "DC_in_100ms[86]", widgetType: WidgetType.HISTOGRAM },
-  { tagId: "DC_in_100ms[87]", widgetType: WidgetType.RADAR_CHART },
-  { tagId: "DC_in_100ms[88]", widgetType: WidgetType.DIGITAL_DISPLAY },
-
-  // Недостающий тег с амперами
-  { tagId: "Base_pumps_Ia_Amps", widgetType: WidgetType.GAUGE },
-];
-
-/**
- * Получить конфигурацию виджета по типу
- */
-export const getWidgetConfig = (type: WidgetType): WidgetConfig => {
-  return WIDGET_CONFIGS[type];
-};
-
-/**
- * Получить все доступные виджеты
- */
-export const getAllWidgetConfigs = (): WidgetConfig[] => {
-  return Object.values(WIDGET_CONFIGS);
-};
-
-/**
- * Получить виджеты по типу данных
- */
-export const getWidgetsByDataType = (
-  dataType: "boolean" | "number"
-): WidgetConfig[] => {
-  return Object.values(WIDGET_CONFIGS).filter((config) =>
-    config.dataTypes.includes(dataType)
+export const getWidgetForTagFromCustomization = (
+  tagId: string,
+  customizations: TagCustomization[]
+): WidgetType | "image" | null => {
+  // Ищем кастомизацию с ключом виджета
+  const widgetCustomization = customizations.find(
+    (c) => c.tag_id === tagId && isWidgetKey(c.key)
   );
-};
 
-/**
- * Получить назначенный виджет для тега
- */
-export const getWidgetForTag = (tagId: string): WidgetType | null => {
-  const assignment = TAG_WIDGET_ASSIGNMENTS.find(
-    (assignment) => assignment.tagId === tagId
+  if (!widgetCustomization) {
+    return null;
+  }
+
+  const parsed = parseCustomizationValue(widgetCustomization.value);
+
+  // Если это картинка
+  if (parsed.isImage) {
+    return "image";
+  }
+
+  // Используем key как имя виджета
+  // key может быть: "Widget", "Vertical bar", "chart", "half-circle"
+  const widgetName = widgetCustomization.key.toLowerCase() === "widget"
+    ? widgetCustomization.value // если key="Widget", то имя в value
+    : widgetCustomization.key;   // иначе key - это имя виджета
+
+  // Нормализуем имя виджета
+  const normalizedName = normalizeWidgetName(widgetName);
+
+  // Пробуем найти виджет по нормализованному имени
+  const widgetType = Object.values(WidgetType).find(
+    (type) => type === normalizedName
   );
-  return assignment?.widgetType || null;
+
+  return widgetType || null;
 };
 
 /**
- * Получить полную информацию о виджете для тега
+ * Получить параметры виджета из кастомизаций API
+ * @param tagId - ID тега
+ * @param customizations - массив кастомизаций из API
+ * @param widgetKey - ключ виджета, для которого нужны параметры (опционально)
+ * @returns объект с параметрами или null
  */
-export const getTagWidgetInfo = (tag: Tag) => {
-  const widgetType = getWidgetForTag(tag.id);
+export const getWidgetParamsFromCustomization = (
+  tagId: string,
+  customizations: TagCustomization[],
+  widgetKey?: string
+): WidgetParams | null => {
+  // Получаем все кастомизации для этого тега
+  const tagCustomizations = customizations.filter((c) => c.tag_id === tagId);
+
+  if (tagCustomizations.length === 0) {
+    return null;
+  }
+
+  const allParams: WidgetParams[] = [];
+
+  for (const customization of tagCustomizations) {
+    // Если указан ключ виджета, берём параметры только из этой кастомизации
+    if (widgetKey && customization.key !== widgetKey) {
+      // Но всегда учитываем общие настройки (color, color_text)
+      if (customization.key.toLowerCase() === "color_text") {
+        allParams.push({ color_text: customization.value });
+        continue;
+      }
+      if (customization.key.toLowerCase() === "color") {
+        allParams.push({ color: customization.value });
+        continue;
+      }
+      continue;
+    }
+
+    const parsed = parseCustomizationValue(customization.value);
+
+    // Если это параметры виджета
+    if (parsed.params) {
+      allParams.push(parsed.params);
+    }
+
+    // Специальная обработка для некоторых ключей
+    if (customization.key.toLowerCase() === "color_text" && !parsed.params) {
+      allParams.push({ color_text: customization.value });
+    }
+
+    if (customization.key.toLowerCase() === "color" && !parsed.params) {
+      allParams.push({ color: customization.value });
+    }
+  }
+
+  // Объединяем все параметры
+  if (allParams.length === 0) {
+    return null;
+  }
+
+  const merged = mergeParams(...allParams);
+  
+  // Валидируем параметры (проверяем min < max и т.д.)
+  return validateParams(merged);
+};
+
+/**
+ * Получить полную информацию о виджете для тега с учётом кастомизации
+ * @param tag - тег
+ * @param customizations - массив кастомизаций из API (опционально)
+ * @returns информация о виджете или null
+ */
+export const getTagWidgetInfoWithCustomization = (
+  tag: Tag,
+  customizations?: TagCustomization[]
+) => {
+  let widgetType: WidgetType | "image" | null = null;
+  let params: WidgetParams | null = null;
+  let widgetKey: string | null = null;
+
+  // Получаем из кастомизаций API
+  if (customizations && customizations.length > 0) {
+    // Сначала находим кастомизацию виджета
+    const widgetCustomization = customizations.find(
+      (c) => c.tag_id === tag.id && isWidgetKey(c.key)
+    );
+
+    if (widgetCustomization) {
+      widgetKey = widgetCustomization.key;
+      widgetType = getWidgetForTagFromCustomization(tag.id, customizations);
+      // Передаём ключ виджета, чтобы получить только его параметры
+      params = getWidgetParamsFromCustomization(tag.id, customizations, widgetKey);
+    }
+  }
+
+  // Если виджет не найден в кастомизациях - возвращаем null
   if (!widgetType) {
     return null;
   }
 
-  const config = getWidgetConfig(widgetType);
+  // Если это картинка
+  if (widgetType === "image") {
+    return {
+      widgetType: "image" as const,
+      tag,
+      params,
+      isImage: true,
+    };
+  }
+
   return {
     widgetType,
-    config,
     tag,
-    isCompatible: config.dataTypes.includes(tag.type as "boolean" | "number"),
+    params,
+    isImage: false,
   };
 };
 
 /**
- * Получить все назначения виджетов
+ * Получить URL картинки из кастомизаций
+ * @param tagId - ID тега
+ * @param customizations - массив кастомизаций из API
+ * @returns URL картинки или null
  */
-export const getAllTagWidgetAssignments = (): TagWidgetAssignment[] => {
-  return TAG_WIDGET_ASSIGNMENTS;
+export const getImageUrlFromCustomization = (
+  tagId: string,
+  customizations: TagCustomization[]
+): string | null => {
+  const widgetCustomization = customizations.find(
+    (c) => c.tag_id === tagId && isWidgetKey(c.key)
+  );
+
+  if (!widgetCustomization) {
+    return null;
+  }
+
+  const parsed = parseCustomizationValue(widgetCustomization.value);
+
+  if (parsed.imageUrl) {
+    // Проверяем безопасность URL перед возвратом
+    if (isSafeUrl(parsed.imageUrl)) {
+      return parsed.imageUrl;
+    }
+    // Если URL небезопасен - возвращаем null
+    return null;
+  }
+
+  return null;
 };
 
-/**
- * Получить цвет виджета по типу
- */
-export const getWidgetColor = (type: WidgetType): string => {
-  return WIDGET_CONFIGS[type]?.color || "#8884d8";
-};
 
 /**
- * Получить иконку виджета по типу
+ * Проверить, является ли виджет тега картинкой
+ * @param tagId - ID тега
+ * @param customizations - массив кастомизаций из API
+ * @returns true если это картинка
  */
-export const getWidgetIcon = (type: WidgetType): string => {
-  return WIDGET_CONFIGS[type]?.icon || "📊";
-};
-
-/**
- * Проверить совместимость виджета с типом данных
- */
-export const isWidgetCompatible = (
-  widgetType: WidgetType,
-  dataType: string
+export const isImageWidget = (
+  tagId: string,
+  customizations: TagCustomization[]
 ): boolean => {
-  const config = getWidgetConfig(widgetType);
-  return config.dataTypes.includes(dataType as "boolean" | "number");
+  const widgetType = getWidgetForTagFromCustomization(tagId, customizations);
+  return widgetType === "image";
+};
+
+/**
+ * Проверить, есть ли кастомизация для тега
+ * @param tagId - ID тега
+ * @param customizations - массив кастомизаций из API
+ * @returns true если есть кастомизация с ключом виджета
+ */
+export const hasCustomization = (
+  tagId: string,
+  customizations: TagCustomization[]
+): boolean => {
+  return customizations.some(
+    (c) => c.tag_id === tagId && isWidgetKey(c.key)
+  );
+};
+
+/**
+ * Получить все виджеты для тега (если их несколько в БД)
+ * @param tagId - ID тега
+ * @param customizations - массив кастомизаций из API
+ * @returns массив ключей виджетов
+ */
+export const getAllWidgetKeysForTag = (
+  tagId: string,
+  customizations: TagCustomization[]
+): string[] => {
+  return customizations
+    .filter((c) => c.tag_id === tagId && isWidgetKey(c.key))
+    .map((c) => c.key);
+};
+
+/**
+ * Получить информацию о конкретном виджете по ключу
+ * @param tag - тег
+ * @param widgetKey - ключ виджета из БД
+ * @param customizations - массив кастомизаций из API
+ * @returns информация о виджете или null
+ */
+export const getTagWidgetInfoByKey = (
+  tag: Tag,
+  widgetKey: string,
+  customizations: TagCustomization[]
+) => {
+  // Находим кастомизацию для этого ключа
+  const widgetCustomization = customizations.find(
+    (c) => c.tag_id === tag.id && c.key === widgetKey
+  );
+
+  if (!widgetCustomization) {
+    return null;
+  }
+
+  const parsed = parseCustomizationValue(widgetCustomization.value);
+
+  // Если это картинка
+  if (parsed.isImage) {
+    const imageUrl = parsed.imageUrl || null;
+    const params = getWidgetParamsFromCustomization(tag.id, customizations, widgetKey);
+    return {
+      widgetType: "image" as const,
+      tag,
+      params,
+      isImage: true,
+      imageUrl,
+    };
+  }
+
+  // Определяем имя виджета
+  const widgetName = widgetKey.toLowerCase() === "widget"
+    ? widgetCustomization.value
+    : widgetKey;
+
+  // Нормализуем имя виджета
+  const normalizedName = normalizeWidgetName(widgetName);
+
+  // Пробуем найти тип виджета
+  const widgetType = Object.values(WidgetType).find(
+    (type) => type === normalizedName
+  );
+
+  if (!widgetType) {
+    return null;
+  }
+
+  // Получаем параметры для этого конкретного виджета
+  const params = getWidgetParamsFromCustomization(tag.id, customizations, widgetKey);
+
+  return {
+    widgetType,
+    tag,
+    params,
+    isImage: false,
+  };
 };

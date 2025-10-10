@@ -1,6 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useCurrents } from "../api/currents";
+import { useHistories } from "../api/histories";
+import { useTagCustomizationsByEdge } from "../api/customization";
+import { hasCustomization, getAllWidgetKeysForTag } from "../utils/widgetUtils";
 import TagSelector from "../components/common/TagSelector";
 import { WidgetFactory } from "../components/widgets";
 import "./CurrentsPage.css";
@@ -17,17 +20,29 @@ const CurrentsPage: React.FC = () => {
     isFetching,
   } = useCurrents(edgeId || "");
 
+  // Загружаем кастомизацию для этого edge
+  const { data: customizations } = useTagCustomizationsByEdge(edgeId || "");
+  
+  // Загружаем историю для графиков
+  const { data: historyData } = useHistories(edgeId || "");
+
+  // Фильтруем теги - показываем только те, для которых есть кастомизация
+  const filteredTags = useMemo(() => {
+    if (!tags || !customizations) return [];
+    return tags.filter((tag) => hasCustomization(tag.id, customizations));
+  }, [tags, customizations]);
+
   useEffect(() => {
     setSelectedTags([]);
     setHasInitialized(false);
   }, [edgeId]);
 
   useEffect(() => {
-    if (tags && !hasInitialized) {
-      setSelectedTags(tags.map((tag) => tag.id));
+    if (filteredTags.length > 0 && !hasInitialized) {
+      setSelectedTags(filteredTags.map((tag) => tag.id));
       setHasInitialized(true);
     }
-  }, [tags, hasInitialized]);
+  }, [filteredTags, hasInitialized]);
 
   const handleTagToggle = (tagId: string) => {
     setSelectedTags((prev) =>
@@ -38,17 +53,16 @@ const CurrentsPage: React.FC = () => {
   };
 
   const handleSelectAll = () => {
-    if (tags) {
-      setSelectedTags(tags.map((tag) => tag.id));
-    }
+    setSelectedTags(filteredTags.map((tag) => tag.id));
   };
 
   const handleDeselectAll = () => {
     setSelectedTags([]);
   };
 
-  const selectedTagsData =
-    tags?.filter((tag) => selectedTags.includes(tag.id)) || [];
+  const selectedTagsData = filteredTags.filter((tag) =>
+    selectedTags.includes(tag.id)
+  );
 
   if (error) {
     return (
@@ -104,9 +118,13 @@ const CurrentsPage: React.FC = () => {
               <div className="spinner"></div>
               <span>Загрузка параметров...</span>
             </div>
+          ) : filteredTags.length === 0 ? (
+            <div className="empty-sidebar">
+              <p>Нет тегов с кастомизацией для объекта {edgeId}</p>
+            </div>
           ) : (
             <TagSelector
-              tags={tags || []}
+              tags={filteredTags}
               selectedTags={selectedTags}
               onTagToggle={handleTagToggle}
               onSelectAll={handleSelectAll}
@@ -122,6 +140,15 @@ const CurrentsPage: React.FC = () => {
               <div className="spinner"></div>
               <span>Загрузка данных...</span>
             </div>
+          ) : filteredTags.length === 0 ? (
+            <div className="empty-state">
+              <h3>Нет тегов с кастомизацией</h3>
+              <p>
+                Для объекта {edgeId} не настроены кастомизации виджетов в базе
+                данных.
+              </p>
+              <p>Отображаются только теги с настроенными виджетами.</p>
+            </div>
           ) : selectedTagsData.length === 0 ? (
             <div className="empty-state">
               <h3>Нет выбранных параметров</h3>
@@ -129,9 +156,21 @@ const CurrentsPage: React.FC = () => {
             </div>
           ) : (
             <div className="visualization-grid">
-              {selectedTagsData.map((tag) => (
-                <WidgetFactory key={tag.id} tag={tag} />
-              ))}
+              {selectedTagsData.map((tag) => {
+                // Получаем все виджеты для этого тега
+                const widgetKeys = getAllWidgetKeysForTag(tag.id, customizations || []);
+                
+                // Создаём отдельный виджет для каждого ключа
+                return widgetKeys.map((widgetKey) => (
+                  <WidgetFactory
+                    key={`${tag.id}-${widgetKey}`}
+                    tag={tag}
+                    customizations={customizations}
+                    widgetKey={widgetKey}
+                    historyData={historyData}
+                  />
+                ));
+              })}
             </div>
           )}
         </div>
