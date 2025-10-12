@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useEdges, useEdgeDetails } from "../api/edges";
-import EdgeList from "../components/EdgeList";
-import EdgeDetails from "../components/EdgeDetails";
+import EdgeList from "../components/edges/EdgeList";
+import EdgeDetails from "../components/edges/EdgeDetails";
 import "./EdgesPage.css";
 
 const EdgesPage: React.FC = () => {

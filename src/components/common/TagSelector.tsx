@@ -1,20 +1,18 @@
 import React from "react";
-import type { Tag } from "../types";
+import type { Tag } from "../../types";
 import "./TagSelector.css";
 
-interface HistoryTagsSelectorProps {
+interface TagSelectorProps {
   tags: Tag[];
   selectedTags: string[];
-  colorMap: Record<string, string>;
   onTagToggle: (tagId: string) => void;
   onSelectAll: () => void;
   onDeselectAll: () => void;
 }
 
-const HistoryTagsSelector: React.FC<HistoryTagsSelectorProps> = ({
+const TagSelector: React.FC<TagSelectorProps> = ({
   tags,
   selectedTags,
-  colorMap,
   onTagToggle,
   onSelectAll,
   onDeselectAll,
@@ -25,7 +23,7 @@ const HistoryTagsSelector: React.FC<HistoryTagsSelectorProps> = ({
   return (
     <div className="tag-selector">
       <div className="tag-selector-header">
-        <h2 className="tag-selector-title">Теги для графиков</h2>
+        <h2 className="tag-selector-title">Параметры</h2>
         <div className="tag-selector-stats">
           {selectedCount} из {totalCount} выбрано
         </div>
@@ -51,20 +49,21 @@ const HistoryTagsSelector: React.FC<HistoryTagsSelectorProps> = ({
       <div className="tag-list">
         {tags.map((tag) => {
           const isSelected = selectedTags.includes(tag.id);
+          const tagTypeClass = `tag-type-${tag.type}`;
+
           return (
             <div
               key={tag.id}
-              className={`tag-item ${isSelected ? "selected" : ""}`}
+              className={`tag-item ${tagTypeClass} ${
+                isSelected ? "selected" : ""
+              }`}
               onClick={() => onTagToggle(tag.id)}
             >
               <div className="tag-checkbox">
                 <input
                   type="checkbox"
                   checked={isSelected}
-                  onChange={(e) => {
-                    e.stopPropagation();
-                    onTagToggle(tag.id);
-                  }}
+                  readOnly
                   className="checkbox-input"
                 />
                 <div className="checkbox-custom">
@@ -73,19 +72,7 @@ const HistoryTagsSelector: React.FC<HistoryTagsSelectorProps> = ({
               </div>
 
               <div className="tag-info">
-                <div className="tag-name">
-                  <span
-                    style={{
-                      display: "inline-block",
-                      width: 10,
-                      height: 10,
-                      borderRadius: 2,
-                      background: colorMap[tag.id] || "#8884d8",
-                      marginRight: 8,
-                    }}
-                  />
-                  {tag.name}
-                </div>
+                <div className="tag-name">{tag.name}</div>
                 <div className="tag-meta">
                   <span className="tag-type">{tag.type}</span>
                   {tag.unit && <span className="tag-unit">{tag.unit}</span>}
@@ -99,4 +86,4 @@ const HistoryTagsSelector: React.FC<HistoryTagsSelectorProps> = ({
   );
 };
 
-export default HistoryTagsSelector;
+export default TagSelector;
